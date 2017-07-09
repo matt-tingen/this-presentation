@@ -220,10 +220,9 @@
             <pre><code class="javascript" data-trim>
               class Baz {
                 constructor() {
+                  this.bar = 7;
                   this.foo = this.foo.bind(this); // boundValue = the instance
                 }
-
-                bar = 7;
 
                 foo() { // context = ?
                   return this.bar
@@ -231,12 +230,104 @@
               }
             </code></pre>
           </section>
+
+          <section>
+            <h3>When to Bind Methods</h3>
+
+            <p>The short answer is "when the function is passed around."</p>
+          </section>
+
+          <section>
+            <h3>Binding Unnecessary</h3>
+
+            <pre><code class="javascript" data-trim>
+              class Baz {
+                constructor() {
+                  this.bar = 7;
+                  this.foo = this.foo.bind(this); // boundValue = the instance
+                }
+
+                foo() { // context = ?
+                  return this.bar
+                }
+
+                doubleFoo() {
+                  // context = the instance; returns (2 * 7)
+                  return 2 * this.foo();
+                }
+              }
+            </code></pre>
+          </section>
+          <section>
+            <h3>Binding Necessary</h3>
+
+            <pre><code class="javascript" data-trim>
+              class Baz {
+                constructor() {
+                  this.bar = 7;
+                  this.doubleFoo = this.doubleFoo.bind(this);
+                  // boundValue = the instance
+                }
+
+                foo() { // context = ?
+                  return this.bar
+                }
+
+                doubleFoo() {
+                  // context = the instance; returns (2 * 7)
+                  return 2 * this.foo();
+                }
+
+                doubleFooGetter() {
+                  return this.doubleFoo(); // boundValue = the instance
+                }
+              }
+            </code></pre>
+          </section>
+
+          <section>
+            <h3>JSX</h3>
+
+            <p>Props and attributes in JSX get passed to the <code>React.createElement</code> function, meaning they need to be bound.
+
+            <pre><code class="javascript" data-trim>
+              import React, { Component } from 'react';
+
+              class Toggle extends Component {
+                constructor(props) {
+                  super(props);
+                  this.state = { enabled: false };
+                  this.toggle = this.toggle.bind(this); // boundValue = the instance
+                }
+
+                toggle() {
+                  this.setState({ enabled: !this.state.enabled });
+                }
+
+                render() {
+                  return (
+                    <button onClick={this.toggle}>
+                      { this.state.enabled ? 'Enabled' : 'Disabled' }
+                    </button>
+                  );
+                }
+              }
+            </code></pre>
+
+          </section>
         </section>
 
         <section>
-          In modern JS, following a few guidelines makes <code>this</code> much easier to deal with.
-          <!-- always arrow functions, never `function` -->
-          <!-- bind instance methods in the constructor if they are passed around -->
+          <h2>Conclusion</h2>
+
+          <p>Allowing <code>this</code> to be variable based on context is confusing and error prone</p>
+
+          <p>In modern JS, following a few guidelines makes <code>this</code> much easier to deal with.</p>
+
+          <ul class="fragment">
+            <li>Always arrow functions instead of plain <code>function</code> declarations</li>
+            <li>Bind instance methods in the constructor if they are passed around </li>
+          </ul>
         </section>
       </div>
     </div>
