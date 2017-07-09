@@ -1,49 +1,261 @@
 <!doctype html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>reveal.js</title>
+    <title>reveal.js</title>
 
-		<link rel="stylesheet" href="css/reveal.css">
-		<link rel="stylesheet" href="css/theme/black.css">
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/black2.css">
 
-		<!-- Theme used for syntax highlighting of code -->
-		<link rel="stylesheet" href="lib/css/zenburn.css">
+    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
 
-		<!-- Printing and PDF exports -->
-		<script>
-			var link = document.createElement( 'link' );
-			link.rel = 'stylesheet';
-			link.type = 'text/css';
-			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
-			document.getElementsByTagName( 'head' )[0].appendChild( link );
-		</script>
-	</head>
-	<body>
-		<div class="reveal">
-			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
-			</div>
-		</div>
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+          <h1>WTF is this?</h1>
+        </section>
+        <section>
+          <h2>A brief history of JavaScript</h2>
+          <p class="fragment">
+            April 1995 - Brendan Eich hired by Netscape to design a scripting language for the browser
+          </p>
+          <p class="fragment">
+            10 days later - JavaScript is born (called Mocha at the time)
+          </p>
+          <blockquote
+            class="fragment"
+            cite="https://www.computer.org/csdl/mags/co/2012/02/mco2012020007.pdf"
+          >
+            &ldquo;If I had done classes in JavaScript back
+            in May 1995, I would have been told
+            that it was too much like Java or that
+            JavaScript was competing with Java …
+            I was under marketing orders to make
+            it look like Java but not make it too big
+            for its britches … [it] needed to be a
+            silly little brother language.&rdquo;
+          </blockquote>
+          <aside class="notes">
+            Needless to say, JS has a lot of quirks as a result of the it was designed.
+            Recent versions of the ECMAScript standard have provided alternatives to a lot of the quirks
+          </aside>
+        </section>
+        <section>
+          <section>
+            <h2>Context</h2>
 
-		<script src="lib/js/head.min.js"></script>
-		<script src="js/reveal.js"></script>
+            <p>The value of <code>this</code> is equal to <code>boundValue || context</code>.
+            Plain functions do not have a bound value initially.</p>
 
-		<script>
-			// More info about config & dependencies:
-			// - https://github.com/hakimel/reveal.js#configuration
-			// - https://github.com/hakimel/reveal.js#dependencies
-			Reveal.initialize({
-				dependencies: [
-					{ src: 'plugin/markdown/marked.js' },
-					{ src: 'plugin/markdown/markdown.js' },
-					{ src: 'plugin/notes/notes.js', async: true },
-					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
-				]
-			});
-		</script>
-	</body>
+            <div class="fragment">
+              <p>The context is <strong>not</strong> defined or known at declaration; it is provided when <em>calling</em> the function.</p>
+
+              <pre><code class="javascript" data-trim>
+                function foo() { // this = ?
+                  return this.bar;
+                }
+              </code></pre>
+            </div>
+          </section>
+
+          <section>
+            <h3>Calling a bare function</h3>
+            <pre><code class="javascript" data-trim>
+              function foo() { // this = ?
+                return this.bar;
+              }
+            </code></pre>
+
+            <p>
+              When the function is called on its own, the context is the global object.
+              In the browser, the global object is <code>window</code>. In Node, it is <code>module</code>.
+            </p>
+
+            <pre><code class="javascript" data-trim>
+              var bar = 1;
+              foo(); // context = window; returns 1
+            </code></pre>
+          </section>
+
+          <section>
+            <h3>Calling from an object</h3>
+            <pre><code class="javascript" data-trim>
+              function foo() { // this = ?
+                return this.bar;
+              }
+
+              const obj = { foo, bar: 4 };
+              obj.foo(); // context = obj; returns 4
+            </code></pre>
+          </section>
+
+          <section>
+            <h3>Forcing context</h3>
+
+            <p>Functions have a <code>.call</code> method which can be used to provide a context without the function being a property on that object</p>
+
+            <pre><code class="javascript" data-trim>
+              function foo() { // this = ?
+                return this.bar;
+              }
+
+              const obj = { bar: 4 };
+              foo.call(obj); // context = obj; returns 4
+            </code></pre>
+          </section>
+
+          <section>
+            <h3>Pitfalls</h3>
+            <pre><code class="javascript" data-trim>
+              const obj = {
+                bar: 6,
+                foo() { // this = ?
+                  return this.bar;
+                },
+              };
+
+              const foo = obj.foo;
+              foo(); // context = window; returns undefined
+
+              obj.foo(); // context = obj; returns 6
+            </code></pre>
+          </section>
+        </section>
+        <section>
+          <section>
+            <h2>Binding</h2>
+
+            <p>Binding a function creates a <em>new</em> function which bakes in a provided value to be used as <code>this</code>.</p>
+            <p>A bound function cannot be unbound or have the bound value overridden in any way.</p>
+
+            <p class="fragment">
+              The value of <code>this</code> is equal to <code>boundValue || context</code>.
+
+              The context from which a bound function is called is ignored in favor of the baked in value.
+            <p>
+          </section>
+
+          <section>
+            <h3>Binding a plain function</h3>
+
+            <p>Functions have a <code>.bind</code> method which can be used to create a bound function</p>
+
+            <pre><code class="javascript" data-trim>
+              function foo() { // this = ?
+                return this.bar;
+              }
+
+              const obj = { bar: 4 };
+              const foo2 = foo.bind(obj); // boundValue = obj
+            </code></pre>
+
+            <pre class="fragment"><code class="javascript" data-trim>
+              foo(); // context = window; returns undefined
+
+              foo2(); // boundValue = obj; returns 4
+            </code></pre>
+
+            <pre class="fragment"><code class="javascript" data-trim>
+              obj.bar = 5;
+              foo2(); // boundValue = obj; returns 5
+            </code></pre>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>Arrow Functions</h2>
+
+            <p>Arrow functions are "auto-binding". Unlike plain functions, the definition of an arrow function is significant.</p>
+            <p>When an arrow function is declared, it is automatically bound with the context of its declaration.</p>
+          </section>
+
+          <section>
+            <h3>Auto-Binding</h3>
+            <pre><code class="javascript" data-trim>
+              const foo = () => this.bar; // boundValue = window
+              var bar = 4;
+
+              foo(); // boundValue = window; returns 4
+
+              foo.call({ bar: 8 }) // boundValue = window; returns 4
+            </code></pre>
+
+            <pre class="fragment"><code class="javascript" data-trim>
+              const obj = {
+                foo: () => this.bar, // boundValue = obj
+                bar: 5,
+              };
+
+              const foo = obj.foo;
+
+              foo(); // boundValue = obj; returns 5
+            </code></pre>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>Classes</h2>
+
+            <p>
+              With the <code>class</code> syntax, methods are plain functions. This means they are <strong>not</strong> bound.
+              Because of this, it is common practice to bind methods in the constructor as needed.
+              Doing so replaces the original method with a new bound copy.
+            </p>
+
+            <pre><code class="javascript" data-trim>
+              class Baz {
+                constructor() {
+                  this.foo = this.foo.bind(this); // boundValue = the instance
+                }
+
+                bar = 7;
+
+                foo() { // context = ?
+                  return this.bar
+                }
+              }
+            </code></pre>
+          </section>
+        </section>
+
+        <section>
+          In modern JS, following a few guidelines makes <code>this</code> much easier to deal with.
+          <!-- always arrow functions, never `function` -->
+          <!-- bind instance methods in the constructor if they are passed around -->
+        </section>
+      </div>
+    </div>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.js"></script>
+
+    <script>
+      // More info about config & dependencies:
+      // - https://github.com/hakimel/reveal.js#configuration
+      // - https://github.com/hakimel/reveal.js#dependencies
+      Reveal.initialize({
+        dependencies: [
+          { src: 'plugin/markdown/marked.js' },
+          { src: 'plugin/markdown/markdown.js' },
+          { src: 'plugin/notes/notes.js', async: true },
+          { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+        ]
+      });
+    </script>
+  </body>
 </html>
