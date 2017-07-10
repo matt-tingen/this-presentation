@@ -81,7 +81,7 @@
 
             <p>
               When the function is called on its own, the context is the global object.
-              In the browser, the global object is <code>window</code>. In Node, it is <code>module</code>.
+              In the browser, the global object is <code>window</code>. In Node, it is <code>global</code>.
             </p>
 
             <pre><code class="javascript" data-trim>
@@ -279,7 +279,7 @@
                 }
 
                 doubleFooGetter() {
-                  return this.doubleFoo(); // boundValue = the instance
+                  return this.doubleFoo; // boundValue = the instance
                 }
               }
             </code></pre>
